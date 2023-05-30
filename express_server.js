@@ -2,6 +2,26 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 
+generateRandomString();
+
+function generateRandomString() {
+  let getRandChar = '';
+  let randArray = [];
+  let charForRand = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+  const maxLength = 6;
+
+  for (let i = 0; i < maxLength; i++) {
+    let genRandomChar = Math.floor(Math.random() * charForRand.length);
+
+    getRandChar = getRandChar + charForRand.charAt(genRandomChar);
+
+    randArray.push(getRandChar);
+  };
+  console.log(getRandChar);
+}
+
+app.use(express.urlencoded({ extended: true }));
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -21,9 +41,18 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => {
