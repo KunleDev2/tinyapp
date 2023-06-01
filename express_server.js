@@ -2,8 +2,6 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 
-generateRandomString();
-
 function generateRandomString() {
   let getRandChar = '';
   let randArray = [];
@@ -17,14 +15,15 @@ function generateRandomString() {
 
     randArray.push(getRandChar);
   };
-  console.log(getRandChar);
+
+  return getRandChar;
 }
 
 app.use(express.urlencoded({ extended: true }));
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -41,18 +40,35 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
-});
-
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
+
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  const generateId = generateRandomString();
+  let getUrlPosted = req.body;
+
+  urlDatabase[generateId] = getUrlPosted.longURL;
+
+  res.redirect("/urls/" + generateId);
 });
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
+});
+
+app.get("/u/:id", (req, res) => {
+  const shortUrlId = req.params.id;
+  const longURL = urlDatabase[shortUrlId];
+
+  if (!(longURL)) {
+    res.send("User Not Found");
+  }
+
+  res.redirect(longURL);
 });
 
 app.get("/urls/:id", (req, res) => {
