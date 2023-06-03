@@ -56,6 +56,14 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls/" + generateId);
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  const shortUrlId = req.params.id;
+
+  delete urlDatabase[shortUrlId];
+
+  res.redirect("/urls/");
+});
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
