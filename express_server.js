@@ -56,10 +56,22 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls/" + generateId);
 });
 
+app.post("/urls", (req, res) => {
+
+});
+
 app.post("/urls/:id/delete", (req, res) => {
   const shortUrlId = req.params.id;
 
   delete urlDatabase[shortUrlId];
+
+  res.redirect("/urls/");
+});
+
+app.post("/urls/:id", (req, res) => {
+  const shortUrlId = req.params.id;
+
+  urlDatabase[shortUrlId] = req.body.longURL;
 
   res.redirect("/urls/");
 });
