@@ -76,6 +76,13 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls/");
 });
 
+// login route
+app.post("/login", (req, res) => {
+  res.cookie("username", "test");
+
+  res.redirect("/urls/");
+});
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
