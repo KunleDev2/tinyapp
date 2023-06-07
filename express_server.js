@@ -30,6 +30,19 @@ let urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -45,7 +58,7 @@ app.get("/hello", (req, res) => {
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"],
+    username: users[req.cookies["user_id"]]
   };
 
   res.render("urls_index", templateVars);
@@ -61,8 +74,22 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls/" + generateId);
 });
 
-app.post("/urls", (req, res) => {
+// app.post("/urls", (req, res) => {
 
+// });
+
+app.post("/register", (req, res) => {
+  const generateId = generateRandomString();
+
+  const newUser = { id: generateId, email: req.body.email, password: req.body.password };
+
+  users[generateId] = newUser;
+
+  console.log(users);
+
+  res.cookie("user_id", generateId);
+
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -97,10 +124,18 @@ app.post("/logout", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    username: users[req.cookies["user_id"]],
   };
 
   res.render("urls_new", templateVars);
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: users[req.cookies["user_id"]],
+  };
+
+  res.render("urls_register", templateVars);
 });
 
 app.get("/u/:id", (req, res) => {
@@ -115,7 +150,7 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: users[req.cookies["user_id"]] };
   res.render("urls_show", templateVars);
 });
 
