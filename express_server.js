@@ -3,23 +3,6 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 
-function generateRandomString() {
-  let getRandChar = '';
-  let randArray = [];
-  let charForRand = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-  const maxLength = 6;
-
-  for (let i = 0; i < maxLength; i++) {
-    let genRandomChar = Math.floor(Math.random() * charForRand.length);
-
-    getRandChar = getRandChar + charForRand.charAt(genRandomChar);
-
-    randArray.push(getRandChar);
-  };
-
-  return getRandChar;
-}
-
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -41,6 +24,39 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+};
+
+function generateRandomString() {
+  let getRandChar = '';
+  let randArray = [];
+  let charForRand = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+  const maxLength = 6;
+
+  for (let i = 0; i < maxLength; i++) {
+    let genRandomChar = Math.floor(Math.random() * charForRand.length);
+
+    getRandChar = getRandChar + charForRand.charAt(genRandomChar);
+
+    randArray.push(getRandChar);
+  };
+
+  return getRandChar;
+};
+
+function checkIfUserExists(email) {
+  let isUserExisting = null;
+
+  for (let key in users) {
+    const userEmail = users[key].email;
+    console.log(email);
+    console.log(userEmail);
+    if (email === userEmail) {
+      console.log("I am not available");
+      isUserExisting = users[key];
+    };
+  };
+
+  return isUserExisting;
 };
 
 app.get("/", (req, res) => {
@@ -79,17 +95,27 @@ app.post("/urls", (req, res) => {
 // });
 
 app.post("/register", (req, res) => {
-  const generateId = generateRandomString();
 
-  const newUser = { id: generateId, email: req.body.email, password: req.body.password };
+  const getIsUserExist = checkIfUserExists(req.body.email);
 
-  users[generateId] = newUser;
+  if (req.body.email === "" || req.body.password === "") {
+    res.sendStatus(400);
+  };
 
-  console.log(users);
+  if (getIsUserExist === null) {
+    const generateId = generateRandomString();
 
-  res.cookie("user_id", generateId);
+    const newUser = { id: generateId, email: req.body.email, password: req.body.password };
 
-  res.redirect("/urls");
+    users[generateId] = newUser;
+
+    res.cookie("user_id", generateId);
+
+    res.redirect("/urls");
+  } else {
+    res.sendStatus(400);
+  }
+
 });
 
 app.post("/urls/:id/delete", (req, res) => {
