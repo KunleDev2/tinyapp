@@ -90,10 +90,6 @@ app.post("/urls", (req, res) => {
   res.redirect("/urls/" + generateId);
 });
 
-// app.post("/urls", (req, res) => {
-
-// });
-
 app.post("/register", (req, res) => {
 
   const getIsUserExist = checkIfUserExists(req.body.email);
@@ -116,6 +112,19 @@ app.post("/register", (req, res) => {
     res.sendStatus(400);
   }
 
+});
+
+app.post("/login", (req, res) => {
+
+
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = {
+    username: users[req.cookies["user_id"]]
+  };
+
+  res.render("url_login", templateVars);
 });
 
 app.post("/urls/:id/delete", (req, res) => {

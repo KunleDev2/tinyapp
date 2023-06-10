@@ -21,14 +21,9 @@
           </div>
         </form>
         <% } else { %>
-          <form class="form-inline" action="/login" method="POST" style="justify-content: center;">
-            <div class="form-group mb-2">
-              <label for="username"></label>
-              <input class="form-control" type="text" name="username" placeholder="Username"
-                style="width: 300px; margin: 1em" />
-              <button type="submit" class="btn btn-outline-dark">Submit</button>
-            </div>
-          </form>
+          <a href="http://localhost:3000/register" type="button" class="btn btn-outline-light">Click here to register</a>
+             | 
+          <a href="http://localhost:3000/login" type="button" class="btn btn-outline-light">Click here to login</a>
           <% } %>
     </div>
   </nav>
