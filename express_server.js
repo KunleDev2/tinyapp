@@ -26,7 +26,7 @@ const users = {
   },
 };
 
-function generateRandomString() {
+const generateRandomString = () => {
   let getRandChar = '';
   let randArray = [];
   let charForRand = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
@@ -38,23 +38,20 @@ function generateRandomString() {
     getRandChar = getRandChar + charForRand.charAt(genRandomChar);
 
     randArray.push(getRandChar);
-  };
+  }
 
   return getRandChar;
 };
 
-function checkIfUserExists(email) {
+const checkIfUserExists = (email) => {
   let isUserExisting = null;
 
   for (let key in users) {
     const userEmail = users[key].email;
-    console.log(email);
-    console.log(userEmail);
     if (email === userEmail) {
-      console.log("I am not available");
       isUserExisting = users[key];
-    };
-  };
+    }
+  }
 
   return isUserExisting;
 };
@@ -81,7 +78,6 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
   const generateId = generateRandomString();
   let getUrlPosted = req.body;
 
@@ -96,7 +92,7 @@ app.post("/register", (req, res) => {
 
   if (req.body.email === "" || req.body.password === "") {
     res.sendStatus(400);
-  };
+  }
 
   if (getIsUserExist === null) {
     const generateId = generateRandomString();
@@ -111,11 +107,6 @@ app.post("/register", (req, res) => {
   } else {
     res.sendStatus(400);
   }
-
-});
-
-app.post("/login", (req, res) => {
-
 
 });
 
@@ -145,16 +136,26 @@ app.post("/urls/:id", (req, res) => {
 
 // login route
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  const getIsUserExist = checkIfUserExists(req.body.email);
 
-  res.redirect("/urls/");
+  if (getIsUserExist === null) {
+    res.sendStatus(403);
+  } else {
+    if (req.body.password !== getIsUserExist.password) {
+      res.sendStatus(403);
+    } else {
+      res.cookie("user_id", getIsUserExist);
+
+      res.redirect("/urls");
+    }
+  }
 });
 
 // logout route
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
 
-  res.redirect("/urls/");
+  res.redirect("/login");
 });
 
 app.get("/urls/new", (req, res) => {
