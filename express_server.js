@@ -1,5 +1,7 @@
 const cookieParser = require("cookie-parser");
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const e = require("express");
 const app = express();
 const PORT = 3000;
 
@@ -60,11 +62,16 @@ const checkIfUserExists = (email) => {
 
   for (let key in users) {
     const userEmail = users[key].email;
+
     if (email === userEmail) {
+      console.log("is email2" + users[key].email);
       isUserExisting[key] = users[key];
+      
+      console.log("is email" + isUserExisting[key]);
     }
   }
 
+  console.log(isUserExisting);
   return isUserExisting;
 };
 
@@ -93,7 +100,7 @@ app.get("/urls", (req, res) => {
   const getObjs = req.cookies["user_id"];
   let getKey = "";
 
-  if (getObjs !== null) {
+  if (getObjs) {
     getKey = JSON.parse(getObjs);
   }
 
@@ -115,7 +122,7 @@ app.post("/urls", (req, res) => {
   const getObjs = req.cookies["user_id"];
   let getKey = "";
 
-  if (getObjs !== null) {
+  if (getObjs) {
     getKey = JSON.parse(getObjs);
   }
 
@@ -134,21 +141,38 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
+  console.log(req.body.email);
 
   const getIsUserExist = checkIfUserExists(req.body.email);
+  console.log("I got here");
+  console.log(getIsUserExist);
 
   if (req.body.email === "" || req.body.password === "") {
     res.sendStatus(400);
   }
 
-  if (getIsUserExist === null) {
+  if (getIsUserExist !== null) {
     const generateId = generateRandomString();
 
-    const newUser = { id: generateId, email: req.body.email, password: req.body.password };
+    const password = req.body.password;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+
+    const newUser = { id: generateId, email: req.body.email, password: hashedPassword };
 
     users[generateId] = newUser;
 
-    res.cookie("user_id", generateId);
+    const assignObj = {};
+
+    assignObj[generateId] = {
+      email: req.body.email,
+      password: req.body.password
+    };
+
+    console.log(assignObj);
+    console.log(users);
+    const newStrngObject = JSON.stringify(assignObj);
+
+    res.cookie("user_id", newStrngObject);
 
     res.redirect("/urls");
   } else {
@@ -161,7 +185,7 @@ app.get("/login", (req, res) => {
   const getObjs = req.cookies["user_id"];
   let getKey = "";
 
-  if (getObjs !== null) {
+  if (getObjs) {
     getKey = JSON.parse(getObjs);
   }
 
@@ -186,7 +210,7 @@ app.post("/urls/:id/delete", (req, res) => {
   const getObjs = req.cookies["user_id"];
   let getKey = "";
 
-  if (getObjs !== null) {
+  if (getObjs) {
     getKey = JSON.parse(getObjs);
   }
 
@@ -230,12 +254,19 @@ app.post("/login", (req, res) => {
     password: getUserObj.password
   };
 
+  console.log("hello one");
+  console.log(assignObj[getUserDetails].password);
+
   if (getUserDetails === null) {
     res.sendStatus(403);
   } else {
-    if (req.body.password !== getUserObj.password) {
+    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
+    const isPassMatched = bcrypt.compareSync(assignObj[getUserDetails].password, hashedPassword);
+    console.log("Pass: " + isPassMatched);
+
+    if (isPassMatched === false) {
       res.sendStatus(403);
-    } else {
+    } else if (isPassMatched === true) {
 
       const newStrngObject = JSON.stringify(assignObj);
 
@@ -257,7 +288,7 @@ app.get("/urls/new", (req, res) => {
   const getObjs = req.cookies["user_id"];
   let getKey = "";
 
-  if (getObjs !== null) {
+  if (getObjs) {
     getKey = JSON.parse(getObjs);
   }
 
@@ -276,13 +307,16 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/register", (req, res) => {
   const getObjs = req.cookies["user_id"];
+
   let getKey = "";
 
-  if (getObjs !== null) {
+  if (getObjs) {
     getKey = JSON.parse(getObjs);
   }
 
   const getSingleKey = Object.keys(getKey)[0];
+
+  console.log("I got here");
 
   const templateVars = {
     username: users[getSingleKey],
@@ -311,7 +345,7 @@ app.get("/urls/:id", (req, res) => {
   const getObjs = req.cookies["user_id"];
   let getKey = "";
 
-  if (getObjs !== null) {
+  if (getObjs) {
     getKey = JSON.parse(getObjs);
   }
 
