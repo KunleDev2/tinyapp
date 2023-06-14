@@ -9,21 +9,33 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userId: "userRandomID"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userId: "user2RandomID"
+  },
+  "dBujWO": {
+    longURL: "http://localhost:3000/urls",
+    userId: "dBujWO"
+  }
 };
 
 const users = {
   userRandomID: {
-    id: "userRandomID",
     email: "user@example.com",
     password: "purple-monkey-dinosaur",
   },
   user2RandomID: {
-    id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: "hello",
   },
+  "dBujWO": {
+    email: "user3@example.com",
+    password: "hello",
+  }
 };
 
 const generateRandomString = () => {
@@ -44,16 +56,24 @@ const generateRandomString = () => {
 };
 
 const checkIfUserExists = (email) => {
-  let isUserExisting = null;
+  let isUserExisting = {};
 
   for (let key in users) {
     const userEmail = users[key].email;
     if (email === userEmail) {
-      isUserExisting = users[key];
+      isUserExisting[key] = users[key];
     }
   }
 
   return isUserExisting;
+};
+
+const urlsForUser = (id) => {
+
+  const loggedInUser = urlDatabase[id].userId;
+
+
+  return loggedInUser;
 };
 
 app.get("/", (req, res) => {
@@ -69,17 +89,44 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+
+  const getObjs = req.cookies["user_id"];
+  let getKey = "";
+
+  if (getObjs !== null) {
+    getKey = JSON.parse(getObjs);
+  }
+
+  const getSingleKey = Object.keys(getKey)[0];
+
+  if (!getSingleKey) {
+    res.send("<html><body>please login/register</body></html>\n");
+  }
+
   const templateVars = {
     urls: urlDatabase,
-    username: users[req.cookies["user_id"]]
+    username: users[getSingleKey]
   };
 
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
+  const getObjs = req.cookies["user_id"];
+  let getKey = "";
+
+  if (getObjs !== null) {
+    getKey = JSON.parse(getObjs);
+  }
+
+  const getSingleKey = Object.keys(getKey)[0];
+
   const generateId = generateRandomString();
   let getUrlPosted = req.body;
+
+  if (!getSingleKey) {
+    res.send("<html><body>please login to shorten url</body></html>\n");
+  }
 
   urlDatabase[generateId] = getUrlPosted.longURL;
 
@@ -111,19 +158,56 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
+  const getObjs = req.cookies["user_id"];
+  let getKey = "";
+
+  if (getObjs !== null) {
+    getKey = JSON.parse(getObjs);
+  }
+
+  const getSingleKey = Object.keys(getKey)[0];
+
   const templateVars = {
-    username: users[req.cookies["user_id"]]
+    username: users[getSingleKey],
   };
+
+  if (getSingleKey) {
+    res.redirect("/urls");
+  }
 
   res.render("url_login", templateVars);
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  const shortUrlId = req.params.id;
+  if (urlDatabase[req.params.id] === undefined) {
+    res.send("<html><body>id does not exist</body></html>\n");
+  }
 
-  delete urlDatabase[shortUrlId];
+  const getObjs = req.cookies["user_id"];
+  let getKey = "";
 
-  res.redirect("/urls/");
+  if (getObjs !== null) {
+    getKey = JSON.parse(getObjs);
+  }
+
+  const getSingleKey = Object.keys(getKey)[0];
+
+  if (!getSingleKey) {
+    res.send("<html><body>Please log in</body></html>\n");
+  }
+
+  const getUserUrl = urlsForUser(getSingleKey);
+
+  if (getUserUrl !== req.params.id) {
+    res.send("<html><body>You do not have permission to delete this url</body></html>\n");
+  } else {
+
+    const shortUrlId = req.params.id;
+
+    delete urlDatabase[shortUrlId];
+
+    res.redirect("/urls/");
+  }
 });
 
 app.post("/urls/:id", (req, res) => {
@@ -137,14 +221,25 @@ app.post("/urls/:id", (req, res) => {
 // login route
 app.post("/login", (req, res) => {
   const getIsUserExist = checkIfUserExists(req.body.email);
+  const getUserDetails = Object.keys(getIsUserExist)[0];
+  let getUserObj = getIsUserExist[getUserDetails];
+  const assignObj = {};
 
-  if (getIsUserExist === null) {
+  assignObj[getUserDetails] = {
+    email: getUserObj.email,
+    password: getUserObj.password
+  };
+
+  if (getUserDetails === null) {
     res.sendStatus(403);
   } else {
-    if (req.body.password !== getIsUserExist.password) {
+    if (req.body.password !== getUserObj.password) {
       res.sendStatus(403);
     } else {
-      res.cookie("user_id", getIsUserExist);
+
+      const newStrngObject = JSON.stringify(assignObj);
+
+      res.cookie("user_id", newStrngObject);
 
       res.redirect("/urls");
     }
@@ -159,17 +254,43 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  const getObjs = req.cookies["user_id"];
+  let getKey = "";
+
+  if (getObjs !== null) {
+    getKey = JSON.parse(getObjs);
+  }
+
+  const getSingleKey = Object.keys(getKey)[0];
+
   const templateVars = {
-    username: users[req.cookies["user_id"]],
+    username: users[getSingleKey],
   };
+
+  if (!getSingleKey) {
+    res.redirect("/login");
+  }
 
   res.render("urls_new", templateVars);
 });
 
 app.get("/register", (req, res) => {
+  const getObjs = req.cookies["user_id"];
+  let getKey = "";
+
+  if (getObjs !== null) {
+    getKey = JSON.parse(getObjs);
+  }
+
+  const getSingleKey = Object.keys(getKey)[0];
+
   const templateVars = {
-    username: users[req.cookies["user_id"]],
+    username: users[getSingleKey],
   };
+
+  if (getSingleKey) {
+    res.redirect("/urls");
+  }
 
   res.render("urls_register", templateVars);
 });
@@ -186,7 +307,36 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: users[req.cookies["user_id"]] };
+
+  const getObjs = req.cookies["user_id"];
+  let getKey = "";
+
+  if (getObjs !== null) {
+    getKey = JSON.parse(getObjs);
+  }
+
+  const getSingleKey = Object.keys(getKey)[0];
+
+  if (!getSingleKey) {
+    res.send("<html><body>please login to to access this url</body></html>\n");
+  }
+
+  if (req.params.id !== getSingleKey.userId) {
+    res.send("<html><body>you do not have permission to view this url</body></html>\n");
+  }
+
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: users[getSingleKey] };
+
+  const getUserUrl = urlsForUser(getSingleKey);
+
+  if (!templateVars.longURL) {
+    res.send("<html><body>url does not exist</body></html>\n");
+  }
+
+  if (!getUserUrl) {
+    res.send("<html><body>you do not have permission to view this url</body></html>\n");
+  }
+
   res.render("urls_show", templateVars);
 });
 
