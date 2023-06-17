@@ -1,4 +1,3 @@
-// const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const express = require("express");
 const bcrypt = require("bcryptjs");
@@ -7,7 +6,6 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.urlencoded({ extended: true }));
-// app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2'],
@@ -92,7 +90,6 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
 
-  // const getObjs = req.cookies["user_id"];
   const getObjs = req.session.user_id;
   let getKey = "";
 
@@ -115,7 +112,6 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  // const getObjs = req.cookies["user_id"];
   const getObjs = req.session.user_id;
   let getKey = "";
 
@@ -167,7 +163,6 @@ app.post("/register", (req, res) => {
 
     const newStrngObject = JSON.stringify(assignObj);
 
-    // res.cookie("user_id", newStrngObject);
     req.session.user_id = newStrngObject;
 
     res.redirect("/urls");
@@ -178,7 +173,6 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  // const getObjs = req.cookies["user_id"];
   const getObjs = req.session.user_id;
   let getKey = "";
 
@@ -205,7 +199,6 @@ app.post("/urls/:id/delete", (req, res) => {
     res.send("<html><body>id does not exist</body></html>\n");
   }
 
-  // const getObjs = req.cookies["user_id"];
   const getObjs = req.session.user_id;
   let getKey = "";
 
@@ -265,7 +258,6 @@ app.post("/login", (req, res) => {
     } else if (isPassMatched === true) {
 
       const newStrngObject = JSON.stringify(assignObj);
-      // res.cookie("user_id", newStrngObject);
       req.session.user_id = newStrngObject;
 
       res.redirect("/urls");
@@ -275,7 +267,6 @@ app.post("/login", (req, res) => {
 
 // logout route
 app.post("/logout", (req, res) => {
-  // res.clearCookie("user_id");
   res.session = null;
   res.clearCookie("session");
 
@@ -283,7 +274,6 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  // const getObjs = req.cookies["user_id"];
   const getObjs = req.session.user_id;
   let getKey = "";
 
@@ -342,7 +332,6 @@ app.get("/u/:id", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
 
-  // const getObjs = req.cookies["user_id"];
   const getObjs = req.session.user_id;
   let getKey = "";
   let errorMsg = null;
