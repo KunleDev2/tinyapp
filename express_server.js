@@ -64,8 +64,8 @@ const generateRandomString = () => {
 };
 
 const urlsForUser = (id, idParam) => {
-  const idOne = urlDatabase[id];
-  const idTwo = idParam;
+  const idOne = urlDatabase[idParam];
+  const idTwo = id;
 
   if (idOne) {
     if (idOne.userId === idTwo) {
@@ -366,7 +366,7 @@ app.get("/urls/:id", (req, res) => {
     return;
   }
 
-  const getUserUrl = urlsForUser(getSingleKey);
+  const getUserUrl = urlsForUser(getSingleKey, req.params.id);
 
   if (!templateVars.longURL) {
     res.send("Url does not exist");
