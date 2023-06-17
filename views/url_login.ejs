@@ -21,6 +21,9 @@
 
         <form method="Post" action="/login">
           <h3 class="font-weight-bold">Login</h3>
+        <% if (error) { %>
+          <p style="color: red;"><%= error %></p>
+        <% } %>
           <div class="form-group">
             <label for="exampleInputEmail1">Email address</label>
             <input name="email" type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
