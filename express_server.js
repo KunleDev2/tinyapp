@@ -3,7 +3,6 @@ const cookieSession = require("cookie-session");
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const checkIfUserExists = require("./helpers");
-const e = require("express");
 const app = express();
 const PORT = 3000;
 
@@ -64,9 +63,9 @@ const generateRandomString = () => {
   return getRandChar;
 };
 
-const urlsForUser = (id, id_param) => {
+const urlsForUser = (id, idParam) => {
   const idOne = urlDatabase[id];
-  const idTwo = id_param;
+  const idTwo = idParam;
 
   if (idOne) {
     if (idOne.userId === idTwo) {
