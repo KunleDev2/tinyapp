@@ -3,7 +3,7 @@ const checkIfUserExists = (email, usersDatabase) => {
 
   for (let key in usersDatabase) {
     const userEmail = usersDatabase[key].email;
-
+    
     if (email === userEmail) {
       isUserExisting[key] = usersDatabase[key];
 

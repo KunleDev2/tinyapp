@@ -30,18 +30,6 @@ let urlDatabase = {
 };
 
 const users = {
-  userRandomID: {
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
-  },
-  user2RandomID: {
-    email: "user2@example.com",
-    password: "hello",
-  },
-  "dBujWO": {
-    email: "user3@example.com",
-    password: "hello",
-  }
 };
 
 app.get("/", (req, res) => {
@@ -123,18 +111,7 @@ app.post("/register", (req, res) => {
 
     users[generateId] = newUser;
 
-    const assignObj = {};
-
-    assignObj[generateId] = {
-      email: req.body.email,
-      password: req.body.password
-    };
-
-    const newStrngObject = JSON.stringify(assignObj);
-
-    req.session.user_id = newStrngObject;
-
-    res.redirect("/urls");
+    res.redirect("/login");
   } else {
     res.sendStatus(400);
   }
@@ -222,8 +199,7 @@ app.post("/login", (req, res) => {
       password: getUserObj.password
     };
 
-    const hashedPassword = bcrypt.hashSync(req.body.password, 10);
-    const isPassMatched = bcrypt.compareSync(assignObj[getUserDetails].password, hashedPassword);
+    const isPassMatched = bcrypt.compareSync(req.body.password, assignObj[getUserDetails].password);
 
     if (isPassMatched === false) {
       res.sendStatus(403);
